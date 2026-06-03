@@ -5,7 +5,8 @@ on:
       - opened
 permissions:
   contents: write
-  pull-requests: read
+  issues: write
+  pull-requests: write
 concurrency:
   group: leaderboard-json-update
   cancel-in-progress: false
@@ -50,3 +51,10 @@ jobs:
           git commit -m "chore: update leaderboard for PR #${PR_NUMBER}"
           git pull --rebase origin "${DEFAULT_BRANCH}"
           git push origin "HEAD:${DEFAULT_BRANCH}"
+      - name: Close PR with comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "Thanks for contributing! 🎉 You've been added to the leaderboard."
+          gh pr close "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}"
